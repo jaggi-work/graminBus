@@ -1,11 +1,15 @@
-import { redis } from "../config/redis.js";
+import { redis, createSubscriber } from "../config/redis.js";
 
 const FALLBACK_SPEED_MPS = 6; // ~22 km/h
 const ETA_CHANGE_THRESHOLD_MIN = 1; // avoid noise
 
-redis.psubscribe("bus:*:update");
+const redisSub = createSubscriber();
 
-redis.on("pmessage", async (_, channel, msg) => {
+redisSub.psubscribe("bus:*:update", (err) => {
+  if (err) console.error("ETA worker psubscribe error:", err.message);
+});
+
+redisSub.on("pmessage", async (_, channel, msg) => {
   try {
     const payload = JSON.parse(msg);
     const busId = payload.busId;

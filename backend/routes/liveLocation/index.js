@@ -1,18 +1,18 @@
-var express = require('express');
-var router = express.Router();
-const db = require("../../config/db.js");
-
-const { cacheTripStops } = require("../../services/tripCache.service.js");
-const { redis } = require("../../config/redis.js");
-const { haversineDistance } = require("../../utils/geo.js");
-const { timeToMinutes } = require("../../utils/time.js");
-const {
+import express from 'express';
+import db from '../../config/db.js';
+import { cacheTripStops } from '../../services/tripCache.service.js';
+import { redis } from '../../config/redis.js';
+import { haversineDistance } from '../../utils/geo.js';
+import { timeToMinutes } from '../../utils/time.js';
+import {
     STOP_CONFIRM_SECONDS,
     STOP_RADIUS_METERS,
     LOW_SPEED_THRESHOLD,
     STOP_HISTORY_LIMIT,
     FINAL_STOP_RADIUS_M
-} = require("../../utils/constants.js");
+} from '../../utils/constants.js';
+
+const router = express.Router();
 
 const TIME_TOLERANCE_MIN = 30;  // minutes before/after schedule
 const MAX_START_STOP_RADIUS_M = 800;
@@ -320,7 +320,7 @@ router.post("/driver/location", async (req, res) => {
 
         if (
             lastStop &&
-            nearestOrder === lastStop.stop_order &&
+            nearestOrder === lastStop.order &&
             nearestDist <= FINAL_STOP_RADIUS_M
         ) {
             console.log(`Bus ${bus_id} reached final stop. Auto ending trip.`);
@@ -333,7 +333,7 @@ router.post("/driver/location", async (req, res) => {
 
             // 2️⃣ cleanup Redis
             await redis.del(`bus:${bus_id}`);
-            await redis.del(`trip:${tripId}:stops`);
+            await redis.del(`trip:${bus.tripId}:stops`);
 
             // 3️⃣ notify subscribers (optional)
             await redis.publish(
@@ -341,7 +341,7 @@ router.post("/driver/location", async (req, res) => {
                 JSON.stringify({
                     type: "TRIP_ENDED",
                     busId: bus_id,
-                    tripId,
+                    tripId: bus.tripId,
                     reason: "AUTO_FINAL_STOP"
                 })
             );
@@ -613,4 +613,4 @@ router.post("/driver/end-trip", async (req, res) => {
 });
 
 
-module.exports = router;
+export default router;

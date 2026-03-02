@@ -1,16 +1,28 @@
-import WebSocket from "ws";
-import { redis } from "../config/redis";
+import WebSocket, { WebSocketServer } from "ws";
 
-const wss = new WebSocket.Server({ port: 8080 });
+export const wss = new WebSocketServer({ port: 8080 });
 
 wss.on("connection", ws => {
-    ws.busIds = [];
+  ws.busIds = [];
 
-    ws.on("message", msg => {
-        const data = JSON.parse(msg);
+  ws.on("message", msg => {
+    try {
+      const data = JSON.parse(msg);
+      if (data.type === "SUBSCRIBE_BUS") {
+        ws.busIds = data.busIds || [];
+      }
+    } catch (err) {
+      console.error("WS message parse error:", err.message);
+    }
+  });
 
-        if (data.type === "SUBSCRIBE_BUS") {
-            ws.busIds = data.busIds || [];
-        }
-    });
+  ws.on("error", (err) => {
+    console.error("WS client error:", err.message);
+  });
 });
+
+wss.on("error", (err) => {
+  console.error("WS server error:", err.message);
+});
+
+console.log("WebSocket server running on port 8080");

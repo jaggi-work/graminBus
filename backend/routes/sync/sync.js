@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
-const db = require("../../config/db.js");
+import express from 'express';
+import db from '../../config/db.js';
+
+const router = express.Router();
 
 // 4️⃣ Get ALL Stoppages at once
 router.get('/stoppages', async (req, res) => {
@@ -143,4 +144,4 @@ router.get("/meta", async (req, res) => {
 
 
 
-module.exports = router;
+export default router;

@@ -1,31 +1,33 @@
-// import Redis from "ioredis";
+import Redis from "ioredis";
 
-// export const redis = new Redis({
-//   host: "127.0.0.1",
-//   port: 6379
-// });
+const REDIS_CONFIG = {
+  host: process.env.REDIS_HOST || "127.0.0.1",
+  port: Number(process.env.REDIS_PORT) || 6379,
+  connectTimeout: 10000,
+};
 
-const Redis = require("ioredis");
+// Main client (commands only — never subscribe on this)
+const redis = new Redis(REDIS_CONFIG);
 
-const redis = new Redis({
-  host: "127.0.0.1",
-  port: 6379,
-  // This helps prevent long hang times if Redis is down
-  connectTimeout: 10000 
-});
-
-// Pub/Sub subscriber
-const redisSub = new Redis({
-  host: "127.0.0.1",
-  port: 6379,
-});
-// ADD THIS: It catches the ECONNREFUSED error so your app doesn't crash
 redis.on("error", (err) => {
-  console.error("Redis connection error:", err.message);
+  console.error("Redis error:", err.message);
 });
-
 redis.on("connect", () => {
-  console.log("Successfully connected to Redis");
+  console.log("Redis connected");
 });
 
-module.exports = { redis ,redisSub };
+/**
+ * createSubscriber()
+ * Returns a fresh ioredis connection dedicated to pub/sub.
+ * Each caller (etaWorker, ws.bridge) gets its own connection
+ * so psubscribe patterns don't clash or double-fire.
+ */
+function createSubscriber() {
+  const sub = new Redis(REDIS_CONFIG);
+  sub.on("error", (err) => {
+    console.error("Redis subscriber error:", err.message);
+  });
+  return sub;
+}
+
+export { redis, createSubscriber };

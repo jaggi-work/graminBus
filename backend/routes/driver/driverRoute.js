@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import db from '../../config/db.js';
+import jwt from 'jsonwebtoken';
+
 const router = express.Router();
-const db = require("../../config/db.js");
-const jwt = require('jsonwebtoken');
 
 
 router.post('/auth/request-otp', async (req, res) => {
@@ -94,4 +95,4 @@ router.post('/auth/verify-otp', async (req, res) => {
 //     });
 // });
 
-module.exports = router;
+export default router;

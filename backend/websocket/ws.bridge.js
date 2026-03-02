@@ -1,17 +1,26 @@
-import { redis } from "../config/redis.js";
+import { WebSocket } from "ws";
+import { redis, createSubscriber } from "../config/redis.js";
 import { wss } from "./ws.server.js";
 
-redis.psubscribe("bus:*:update", "bus:*:eta");
+const redisSub = createSubscriber();
 
-redis.on("pmessage", (_, channel, msg) => {
-  const payload = JSON.parse(msg);
+redisSub.psubscribe("bus:*:update", "bus:*:eta", (err) => {
+  if (err) console.error("WS bridge psubscribe error:", err.message);
+});
 
-  wss.clients.forEach(client => {
-    if (
-      client.readyState === WebSocket.OPEN &&
-      client.busIds?.includes(payload.busId)
-    ) {
-      client.send(JSON.stringify(payload));
-    }
-  });
+redisSub.on("pmessage", (_, channel, msg) => {
+  try {
+    const payload = JSON.parse(msg);
+
+    wss.clients.forEach(client => {
+      if (
+        client.readyState === WebSocket.OPEN &&
+        client.busIds?.includes(payload.busId)
+      ) {
+        client.send(JSON.stringify(payload));
+      }
+    });
+  } catch (err) {
+    console.error("WS bridge pmessage error:", err.message);
+  }
 });

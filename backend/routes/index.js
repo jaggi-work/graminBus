@@ -1,5 +1,7 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express';
+import db from '../config/db.js';
+
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -89,4 +91,4 @@ router.post("/generate-trip-stoppages", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

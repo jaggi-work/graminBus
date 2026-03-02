@@ -1,11 +1,14 @@
 import http from "http";
 import app from "./app.js";
-import { initWebSocket } from "./websocket/ws.server.js";
+
+// Side-effect imports: start WebSocket server and background services
+import "./websocket/ws.server.js";
+import "./websocket/ws.bridge.js";
+import "./services/etaWorker.service.js";
+import "./services/persist.service.js";
 
 const server = http.createServer(app);
 
-initWebSocket(server);
-
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+server.listen(process.env.PORT || 3000, "0.0.0.0", () => {
+  console.log(`Server running on port ${process.env.PORT || 3000}`);
 });

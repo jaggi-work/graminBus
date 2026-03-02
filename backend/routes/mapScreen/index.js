@@ -1,6 +1,7 @@
-var express = require("express");
-var router = express.Router();
-const db = require("../../config/db.js");
+import express from 'express';
+import db from '../../config/db.js';
+
+const router = express.Router();
 
 
 
@@ -56,4 +57,4 @@ router.post("/update-location", async (req, res) => {
 
 
 
-module.exports = router;
+export default router;

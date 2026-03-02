@@ -6,6 +6,11 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var driverRouter = require ('./routes/driver/driverRoute')
+var liveLocationRouter = require('./routes/liveLocation/index')
+var mapScreenRouter = require('./routes/mapScreen/index')
+var syncRouter = require('./routes/sync/sync')
+
 
 var app = express();
 
@@ -21,6 +26,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/driver', driverRouter);
+app.use('/', liveLocationRouter);
+app.use('/', mapScreenRouter);
+app.use('/sync', syncRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
